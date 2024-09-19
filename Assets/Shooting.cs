@@ -6,20 +6,17 @@ public class Shooting : MonoBehaviour
 {
     [SerializeField] private float _number;
     [SerializeField] private Bullet _prefab;
-    [SerializeField] private float _timeWaitShooting;
+    [SerializeField] private float _timeBetweenShoots;
+    [SerializeField] private Transform _objectToShoot;
 
-    private Transform _objectToShoot;
-        
-    void Start()
+    private void Start()
     {
-        StartCoroutine(ShootingWorker());
+        StartCoroutine(Shoot());
     }
 
-    IEnumerator ShootingWorker()
+    private IEnumerator Shoot()
     {
-        bool isWork = enabled;
-
-        while (isWork)
+        while (true)
         {
             var _vector3direction = (_objectToShoot.position - transform.position).normalized;
             var NewBullet = Instantiate(_prefab, transform.position + _vector3direction, Quaternion.identity);
@@ -27,7 +24,7 @@ public class Shooting : MonoBehaviour
             NewBullet.GetComponent<Rigidbody>().transform.up = _vector3direction;
             NewBullet.GetComponent<Rigidbody>().velocity = _vector3direction * _number;
 
-            yield return new WaitForSeconds(_timeWaitShooting);
+            yield return new WaitForSeconds(_timeBetweenShoots);
         }
     }
 }
