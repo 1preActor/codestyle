@@ -1,39 +1,43 @@
 using UnityEngine;
 
-public class Mover : MonoBehaviour
+public class PathFollower : MonoBehaviour
 {
-    private float _speed;
-    private Transform place;
-    private Transform[] _places;
-    private int _placeNumber;
+    [SerializeField] private float _moveSpeed;
+    [SerializeField] private Transform _waypointContainer;
+
+    private Transform[] _waypoints;
+    private int _waypointIndex;
 
     private void Start()
     {
-        _places = new Transform[place.childCount];
+        _waypoints = new Transform[_waypointContainer.childCount];
 
-        for (int i = 0; i < place.childCount; i++)
-            _places[i] = place.GetChild(i).GetComponent<Transform>();
+        _waypointIndex = ++_waypointIndex % _waypoints.Length;
     }
 
     private void Update()
     {
-        var target = _places[_placeNumber];
+        Transform _targetWaypoint = _waypoints[_waypointIndex];
 
-        transform.position = Vector3.MoveTowards(transform.position, target.position, _speed * Time.deltaTime);
+        LookAtWaypoint();
+        transform.position = Vector3.MoveTowards(transform.position, _targetWaypoint.position, _moveSpeed * Time.deltaTime);
 
-        if (transform.position == target.position) GetNextPlace();
+        if (transform.position == _targetWaypoint.position)
+            ChooseWaypoint();
     }
 
-    private Vector3 GetNextPlace()
+    private void ChooseWaypoint()
     {
-        _placeNumber++;
+        _waypointIndex++;
 
-        if (_placeNumber == _places.Length)
-            _placeNumber = 0;
+        if (_waypointIndex == _waypoints.Length)
+            _waypointIndex = 0;
+    }
 
-        var bulletVector = _places[_placeNumber].transform.position;
-        transform.forward = bulletVector - transform.position;
+    private void LookAtWaypoint()
+    {
+        Vector3 currentWaypointPosition = _waypoints[_waypointIndex].transform.position;
 
-        return bulletVector;
+        transform.forward = currentWaypointPosition - transform.position;
     }
 }

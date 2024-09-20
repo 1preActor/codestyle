@@ -1,16 +1,19 @@
 using System.Collections;
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
 public class Shooting : MonoBehaviour
 {
-    [SerializeField] private float _number;
+    [SerializeField] private float _speed;
     [SerializeField] private Bullet _prefab;
     [SerializeField] private float _timeBetweenShoots;
     [SerializeField] private Transform _objectToShoot;
 
+    private WaitForSeconds _shootInterval;
+
     private void Start()
     {
+        _shootInterval = new WaitForSeconds(_timeBetweenShoots);
+
         StartCoroutine(Shoot());
     }
 
@@ -18,13 +21,18 @@ public class Shooting : MonoBehaviour
     {
         while (true)
         {
-            var _vector3direction = (_objectToShoot.position - transform.position).normalized;
-            var NewBullet = Instantiate(_prefab, transform.position + _vector3direction, Quaternion.identity);
+            Rigidbody bulletRigidbody;
+            Vector3 direction = (_objectToShoot.position - transform.position).normalized;
 
-            NewBullet.GetComponent<Rigidbody>().transform.up = _vector3direction;
-            NewBullet.GetComponent<Rigidbody>().velocity = _vector3direction * _number;
+            Bullet newBullet = Instantiate(_prefab, transform.position + direction, Quaternion.identity);
 
-            yield return new WaitForSeconds(_timeBetweenShoots);
+            if (newBullet.TryGetComponent(out bulletRigidbody))
+            {
+                bulletRigidbody.transform.up = direction;
+                bulletRigidbody.velocity = direction * _speed;
+            }
+
+            yield return _shootInterval;
         }
     }
 }
